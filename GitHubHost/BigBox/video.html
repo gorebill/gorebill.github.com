@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--
+// Author: Bill, 2012
+-->
+<html lang="en">
+<head>
+
+<meta charset="utf-8" />
+<title>Video To GIF</title>
+
+<script src="js/jquery-1.6.4.js"></script>
+<script src="js/jquery.form.js"></script>
+
+<script>
+var Server="http://23.21.100.128:8080";
+
+$(function(){
+	"use strict";
+	
+	setInterval(check, 2000);
+	
+	$(".block").hide();
+	
+	$(".submit").children("a").bind("click", function(){
+		
+		var filename=$("form").find("input[type='file']").val();
+		if(!filename) {
+			alert("I wanna a file to convert LoL");
+			return;
+		}
+		
+		$(".block").show();
+		
+		$("form").attr("method","POST")
+			.attr("action",Server+"/videotogif/upload")
+			.attr("enctype","multipart/form-data")
+			.ajaxSubmit({
+				uploadProgress: function(event, position, total, percentComplete) {
+					var tmp="";
+					if(100==percentComplete) {
+						tmp=" (Converting...<label id='postProgress'>0%</label>)";
+					}
+					$(".progress").html("Progress: "+percentComplete+"%"+tmp);
+				},
+				success: function(data) {
+					$(".block").hide();
+					try{
+						data=$.parseJSON(data);
+						
+						var img="<img src='"+Server+"/videotogif/retrieve?id="+data.id+"&_"+new Date().getTime()+"'>";
+						$(".result").empty().append(img);
+						
+					}catch(e){alert("Service may be maintaining!");}
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					$(".block").hide();
+					alert(textStatus);
+				}
+			});
+			
+		return false;
+	});
+	
+});
+
+function check() {
+	$.ajax({
+		url: Server+"/videotogif/check",
+		type: "POST",
+		cache: false,
+		success: function(data) {
+			if(data && $(data).find("con_percent_complete")) {
+				$("#postProgress").html($(data).find("con_percent_complete").text()+"%");
+			}
+		},
+		error: function(){}
+	});
+}
+</script>
+ 
+
+<style>
+html, body {height:100%;vertical-align:middle;margin:0;padding:0;background:#eee;border-spacing:0;overflow:hidden;}
+#container {
+	position:relative;
+	top:20px;
+	text-align:center;
+	margin:20px auto;
+	padding:20px;
+	border:1px solid #ccc;
+	border-radius:5px;
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+	-o-border-radius:5px;
+	-ms-border-radius:5px;
+	max-width:700px;
+	background: #fff;
+}
+.divTitle {font-size:20px;text-align:left;border-bottom:1px dashed #ccc;}
+.divContent {font-size:16px;text-align:left;margin: 10px;}
+.divContent table {width:100%;border-collapse:collapse;}
+.divContent table td {padding:5px;}
+.divContent table td:first-child {text-align:right;border-bottom:1px dotted #ccc;}
+.divContent table td:last-child {text-align:left;}
+.divContent table .submit {text-align:center !important;}
+.divContent table .submit a {
+	padding:2px 5px;
+	border:1px solid #aaa;
+	border-radius:10px;
+	-webkit-border-radius:10px;
+	-moz-border-radius:10px;
+	-o-border-radius:10px;
+	-ms-border-radius:10px;
+	cursor:pointer;
+	color:white;
+	font-weight:bold;
+	background: #BCEA06;
+	text-decoration: none;
+}
+.tips{color:#777;font-size:12px;}
+
+.block {z-index: 999; position:absolute;left:0;top:0;display:inline-block;width:100%;height:100%;background:gray;opacity:.5;vertical-align:middle;}
+.block table {width:100%;height:100%;}
+.block table td {vertical-align: middle;color:white;font-size:20px;font-weight:bold;opacity: 1;}
+.block .progress {padding:15px;background:#000;
+	border-radius:10px;
+	-webkit-border-radius:10px;
+	-moz-border-radius:10px;
+	-o-border-radius:10px;
+	-ms-border-radius:10px;
+}
+
+.result{text-align:center;}
+.result img{max-width:400px;}
+</style>
+</head>
+
+<body>
+	
+<div id="container">
+	<div class="block">
+		<table><tr><td>
+			<span class="progress">Progress: N/A</span>
+		</td></tr></table>
+	</div>
+	
+	
+	<div class="divTitle">Converting a video in animated GIF</div>
+	<div class="divContent">
+		<label class="tips">Choose your video file to convert.</label>
+		<form>
+		<table>
+			<tr><td>Path of the video</td><td><input name="filename" type="file"></td></tr>
+			<tr><td colspan="2" class="submit"><a href="#">Create my GIF Video</a></td></tr>
+		</table>
+		</form>
+	</div>
+	
+	<div class="divTitle">GIF Video Created</div>
+	<div class="divContent">
+		<label class="tips">Right click and choose "save as ..." to download it.</label>
+		<div class="result"></div>
+	</div>
+</div>
+
+
+</body>
+
+
+</html>

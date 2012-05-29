@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!--#include virtual="config.shtml" -->
+<html>
+<head>
+<title>The page is temporarily unavailable</title>
+<meta charset="utf-8">
+<style>
+html {height:100%;}
+body { font-family: Tahoma, Verdana, Arial, sans-serif; height:100%;padding:0;margin:0;}
+* {cursor: default;}
+.message {
+  padding: 40px 20px;
+  text-align:center;
+  border:1px solid #ccc;
+  border-radius:5px;
+  background:#f0f0f0;
+  box-shadow: rgba(0,0,0,.5) 2px 2px 2px;
+  display:inline-block;
+  position:relative;
+  top: -40px;
+  
+  transition: all 1s linear;
+  -webkit-transition: all 1s linear;
+  -moz-transition: all 1s linear;
+  -o-transition: all 1s linear;
+  -ms-transition: all s linear;
+  
+  -webkit-animation-name: "rolling";
+  -webkit-animation-duration: 8s;
+  -webkit-animation-iteration-count: infinite;
+}
+.message .main {font-size: 20px;color: #444;}
+.message .subs {font-size: 14px;color: #666;}
+@-webkit-keyframes "rolling" {
+  from {
+    -webkit-transform:rotateX(0deg) rotateY(0deg);
+  }
+  40% {
+    -webkit-transform:rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    -webkit-transform:rotateX(360deg) rotateY(0deg);
+  }
+  60% {
+    -webkit-transform:rotateX(360deg) rotateY(0deg);
+  }
+  to {
+    -webkit-transform:rotateX(360deg) rotateY(0deg);
+  }
+}
+.message:hover {background:#d4d4d4;}
+</style>
+
+<script>
+window.onload=function() {
+  document.getElementById("require_path").innerHTML="["+window.location.href+"]";
+}
+</script>
+</head>
+<body>
+<table width="100%" height="100%">
+<tr>
+<td align="center" valign="middle">
+<span class="message">
+<p class="main">
+<img valign="bottom" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAFKUlEQVRIibWWTUxUVxTHf+e+x3wg
+tYJ1DFVrlLDqwk8sbRoFNdXR+pGaYaMzjFHRxEhk1UXjRzEaV2rKwpSKytCFBmyqgqOJqZM2rRqs
+sYmLTnU00SBhEkHxY5iB924XvmcJReymN7mLd+4953/+53/vO1cYYwSDQW8gEFgqIp9rrT8SkWKt
+dZGI9Gqtu0Xkuta6PZ1OX47H49k3xZHRjBUVFWZJSckmy7J2AVPGSsQZXYZh7EulUk2JRGLorSCR
+SGSKYRg/aq3nOqZWrXWDbdu3WlpaMoANqHA47FdKzRaRHUAIQERuWpa1NhaLdb0RZPPmzfOGhobO
+A5OBKx6PJ9zY2Ng9BgMBdDgcnmEYxndAJdBjmuaqY8eO/f4vkEgkMkUp1ekA7D958uTukRG11u+N
+tHV2dvrLysoyAFu3bm3I5XJVQI9t22UuI4FXGsyYMeOq1nrunDlzOmpra4uBLKDHYEEmkzH8fr8F
+cObMmWnt7e3TZ86c2Xfv3r13DcP4I5VKLUgkEkMmgCPyXNM0f6mtrX0f+BW4NBqIZVliGIZ+8uSJ
+Z8KECTmAgwcPrk8mk5+KiN3V1ZU/bdq0Zw8fPpxVUlKyKZFIfKuCwaDXOUUsX758OzAAnBWRCyIS
+HzlN07wQiUR+LiwsPCsi8Y0bN85PJpPrAWzbfhoIBDp27tz5l5PQrmAw6FWBQGApr45p67p163qc
+7L2jVEcA6urq/C0tLS8cHfcA9c56P9BcX19/rKioKOv1es8DUwKBwFIFrHREbRir/rw6ReMOHz6c
+cQGUUnsd3ydKqebm5uY6gFwup6ZOndro+K1UQLlD9dZYCKFQqGA4AxfAYXDy+PHjtQCPHz/2ejwe
+u7Ky8razXq5EpBjAuWijlqimpia/tbX1OUB1dfVuB8ACeoczWL169TsTJ07MApSWlmYBRKRYaa2L
+nID2aCUKhUIFjY2NL10AEfnaWXth23aLy6Curs5/7ty5Z65jIBCwnFIWKRHpdezK3WBZ1muRXQbR
+aHSvA2ADT23bPhGLxXa6pXS1cn17enqUw6RXaa27AcLhsB/nXhiGYY0UGdjjZPZUKRVzAYYn4voC
+JJNJr7O/W4nIdQCl1Oz+/n4N5D1//vyLWCy2QGu9eP/+/c2uyEqpl9OnT/+pqanprNZ6STqdXnHo
+0KFPtNZLtNaLtdaVwCog78qVKx86uNdMrXW7iGwTkR3jx4/fNjAwYBcUFGwBNnZ0dBh37txRAOPG
+jWPhwoW+qqqqNcCaXC7HpEmTXms3TEcT+O3Ro0dbnO8OlU6nLwNdQOjo0aMf+Hw+BcjFixfNtrY2
+BZCfn8+iRYt0VVUVgBocHFQej0c5OionsDulr6/Pn8vl1gJd6XT6sorH41nDMPYB3Lhx4wjw56VL
+lzh9+rSICAUFBVRUVBAKhQQgm82Sl5eHU28XRIZNGhoaih199sXj8awCSKVSTSJy07btRdu3b/ef
+OnUKpVRGRDKFhYU/hEKhDUBqcHBQeb2v/zhKRFLABmAp8Bmw7MCBA9/fv39/sojcTKVSTfCGfqK1
+vioi80TkmxMnTnwJkMlkLvp8vmX8c58UcEFEVroxotFoPfAVI/rJ67sRi8W6TNNcBfSIyMcicjsv
+L+8IQG9v7wqfzzdrWHDXb67WeklNTU1xNBq97AKYprlqeAt+a4/XWrdVV1ffLS8vL/V4PAOGYWjL
+siSXyxl3794NtLW1jX/w4MF8+I893h3/+2tl+HDfXbxqB+Uj313ANaDjbe+uvwGINGqkcKi0egAA
+AABJRU5ErkJggg=="/>
+The page you are looking for is out of service.</p>
+<p class="subs" id="require_path"></p>
+</span>
+</td>
+</tr>
+</table>
+</body>
+</html>
