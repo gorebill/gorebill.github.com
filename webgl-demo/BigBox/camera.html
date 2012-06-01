@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8" />
+<title>Big Box Cam.</title>
+
+<script src="js/jquery-1.6.4.js"></script>
+<script src="js/Three.js"></script>
+
+<script>
+$(function(){
+	$("#camera-start").bind("click", function(){
+		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+		
+		window.cccontext=document.getElementById("cameraCanvas").getContext("2d");
+		
+		var video = document.querySelector("video");
+		$(video).css("display", "none");
+		
+		$("#cameraCanvas").css("height", "100%");
+		
+		if(navigator.getUserMedia) {
+			navigator.getUserMedia(
+				{audio: true,video: true}, 
+				function(stream){
+					if(navigator.webkitGetUserMedia) {
+						video.src=window.webkitURL.createObjectURL(stream);
+					}else {
+						video.src=stream;
+					}
+					window.stream=stream;
+					//video.controls=true;
+				},
+				function(e) {
+					if(window.console){console.log("media failed");};
+				}
+			);
+		}
+		
+	}).trigger("click");;
+	
+	$("#camera-stop").bind("click", function(){
+		window.stream.stop();
+	});
+		
+	setInterval(function(){
+		if(window.cccontext) {
+			var video = document.querySelector("video");
+			cccontext.drawImage(video,0,0,video.width,video.height);
+		}
+	}, 16);
+});
+
+
+function update(stream, which) {
+	//document.querySelector(which).src=stream.url;
+}
+</script>
+
+<style>
+html, body {height:100%;vertical-align:middle;margin:0;padding:0;background:#ddd;border-spacing:0;overflow:hidden;text-align:center;}
+button {background:none;border:1px solid silver;cursor:pointer;color:white;border-radius:5px;}
+button:hover
+</style>
+</head>
+
+<body>
+
+<div style="z-index:999;position:absolute;margin:auto;top:5px;text-align: center;width:100%;">
+	<button id="camera-start">Start Camera</button>
+	<button id="camera-stop">Stop Camera</button>
+</div>
+
+<div id="container">
+	<span>
+		<video width="320" height="240" type="media" autoplay></video>
+		<canvas id="cameraCanvas"></canvas>
+	</span>
+</div>
+
+
+</body>
+
+
+</html>
