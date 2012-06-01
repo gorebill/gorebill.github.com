@@ -5,18 +5,228 @@
 <meta charset="utf-8" />
 <title>Big Box Cam.</title>
 
+<link href="css/camera.css" rel="stylesheet" />
+
 <script src="js/jquery-1.6.4.js"></script>
 <script src="js/Three.js"></script>
 
 <script>
+window.config={
+	"camera.flip.mode": false,
+	cinema: {
+		texture: undefined
+	}
+};
+
+window.config.method={
+	"particle": function(canvas, cinema) {
+		window.config.cinema.scene=new THREE.Scene();
+		window.config.cinema.camera=new THREE.PerspectiveCamera(50, canvas.width/canvas.height, 1, 10000);
+		window.config.cinema.camera.position.set(0,0,500);
+		window.config.cinema.camera.lookAt(new THREE.Vector3(0,0,-1000));
+		window.config.cinema.scene.add(window.config.cinema.camera);
+		
+		var width=640,height=480,nearClipping=850,farClipping=4000;
+		window.config.cinema.texture=new THREE.Texture(canvas);
+		window.config.cinema.geometry=new THREE.Geometry();
+		for(var i=0; i<width*height; i++) {
+			var vertex=new THREE.Vector3();
+			vertex.x=(i%width);
+			vertex.y=Math.floor(i/width);
+			
+			window.config.cinema.geometry.vertices.push(vertex);
+		}
+		window.config.cinema.material=new THREE.ShaderMaterial({
+			uniforms: {
+				"map": {type: "t", value: 0, texture: window.config.cinema.texture},
+				"width": {type: "f", value: width},
+				"height": {type: "f", value: height},
+				"nearClipping": {type: "f", value: nearClipping},
+				"farClipping": {type: "f", value: farClipping},
+				"pointSize": {type: "f", value: 2},
+				"zOffset": {type: "f", value: 1000}
+			},
+			vertexShader: [
+				"uniform sampler2D map;",
+				
+				"uniform float width;",
+				"uniform float height;",
+				"uniform float nearClipping, farClipping;",
+				
+				"uniform float pointSize;",
+				"uniform float zOffset;",
+				
+				"varying vec2 vUv;",
+				
+				"const float XtoZ=1.11146;",
+				"const float YtoZ=0.83359;",
+				
+				"void main() {",
+				"	vUv=vec2(position.x / width, 1.0 - (position.y / height));",
+				
+				"	vec4 color=texture2D(map, vUv);",
+				"	float depth=(color.r+color.g+color.b)/3.0;",
+				
+				"	float z=(1.0-depth) * (farClipping - nearClipping) + nearClipping;",
+				
+				"	vec4 pos=vec4((position.x / width - 0.5) * z * XtoZ, (position.y / height - 0.5) * z * YtoZ, -z + zOffset, 1.0);",
+				"	gl_PointSize=pointSize;",
+				"	gl_Position=projectionMatrix * modelViewMatrix * pos;",
+				"}"
+			].join("\n"),
+			fragmentShader: [
+				"uniform sampler2D map;",
+				"varying vec2 vUv;",
+				"void main() {",
+				"	vec4 color=texture2D(map, vUv);",
+				"	gl_FragColor=vec4(color.rgb, smoothstep(8000.0, -8000.0, gl_FragCoord.z/gl_FragCoord.w));",
+				"}"
+			].join("\n"),
+			depthWriter: false
+		});
+		window.config.cinema.mesh=new THREE.ParticleSystem(window.config.cinema.geometry, window.config.cinema.material);
+		window.config.cinema.mesh.position.x=0;
+		window.config.cinema.mesh.position.y=0;
+		window.config.cinema.scene.add(window.config.cinema.mesh);
+		
+		window.config.cinema.renderer=new THREE.WebGLRenderer({
+			canvas: document.querySelector("#cinemaCanvas")
+		});
+		//window.config.cinema.renderer.setSize(window.innerWidth, window.innerHeight);
+		window.config.cinema.renderer.setSize(canvas.width, canvas.height);
+		$("#cinemaCanvas").css("height", "100%");
+	},
+	
+	"plane": function(canvas, cinema) {
+		window.config.cinema.scene=new THREE.Scene();
+		window.config.cinema.camera=new THREE.PerspectiveCamera(90, canvas.width/canvas.height, 1, 10000);
+		window.config.cinema.camera.position.set(0,0,canvas.height/2);
+		window.config.cinema.camera.lookAt(new THREE.Vector3(0,0,-1000));
+		window.config.cinema.scene.add(window.config.cinema.camera);
+		
+		window.config.cinema.texture=new THREE.Texture(canvas);
+		window.config.cinema.texture.minFilter=THREE.LinearFilter;
+		window.config.cinema.texture.maxFilter=THREE.LinearFilter;
+		window.config.cinema.material=new THREE.MeshBasicMaterial({map: window.config.cinema.texture, overdraw: true});
+		window.config.cinema.geometry=new THREE.PlaneGeometry(canvas.width,canvas.height,4,4);
+		window.config.cinema.mesh=new THREE.Mesh(window.config.cinema.geometry, window.config.cinema.material);
+		window.config.cinema.mesh.rotation.x=Math.PI/2;
+		window.config.cinema.mesh.position.x=window.config.cinema.mesh.position.y=0;
+		window.config.cinema.mesh.scale.x=window.config.cinema.mesh.scale.y=window.config.cinema.mesh.scale.z=1;
+		//window.config.cinema.mesh.doubleSided=true;
+		window.config.cinema.scene.add(window.config.cinema.mesh);
+		
+		window.config.cinema.renderer=new THREE.WebGLRenderer({
+			canvas: document.querySelector("#cinemaCanvas")
+		});
+		window.config.cinema.renderer.setSize(canvas.width, canvas.height);
+		$("#cinemaCanvas").css("height", "100%");
+	},
+	
+	"grids": function(canvas, cinema) {
+		window.config.cinema.counter=0;
+		window.config.cinema.scene=new THREE.Scene();
+		window.config.cinema.camera=new THREE.PerspectiveCamera(90, canvas.width/canvas.height, 1, 10000);
+		window.config.cinema.camera.position.set(0,0,canvas.height/2);
+		window.config.cinema.camera.lookAt(new THREE.Vector3(0,0,-1000));
+		window.config.cinema.scene.add(window.config.cinema.camera);
+		
+		window.config.cinema.texture=new THREE.Texture(canvas);
+		window.config.cinema.texture.minFilter=THREE.LinearFilter;
+		window.config.cinema.texture.maxFilter=THREE.LinearFilter;
+		window.config.cinema.texture.format=THREE.RGBFormat;
+		window.config.cinema.material=new THREE.MeshLambertMaterial({color: 0xffffff, map: window.config.cinema.texture});
+		window.config.cinema.meshes=[];
+		
+		var light=new THREE.DirectionalLight(0xffffff);
+		light.position.set(0.5,1,1).normalize();
+		window.config.cinema.scene.add(light);
+		
+		light=new THREE.AmbientLight(0x606060);
+		window.config.cinema.scene.add(light);
+		
+		window.config.cinema.renderer=new THREE.WebGLRenderer({
+			canvas: document.querySelector("#cinemaCanvas"),
+			antialias: true
+		});
+		window.config.cinema.renderer.setSize(canvas.width, canvas.height);
+		$("#cinemaCanvas").css("height", "100%");
+		
+		window.config.cinema.renderer.initMaterial(
+			window.config.cinema.material, 
+			window.config.cinema.scene.__lights, 
+			window.config.cinema.scene.fog
+		);
+		
+		var xgrid=20, ygrid=10,
+			ux=1/xgrid, uy=1/ygrid,
+			xsize=canvas.width/xgrid, ysize=canvas.height/ygrid;
+		
+		for(var i=0; i<xgrid; i++) {
+			for(var j=0; j<ygrid; j++) {
+				var ox=i, oy=j;
+				
+				window.config.cinema.geometry=new THREE.CubeGeometry(xsize, ysize, xsize);
+				changeUvs(window.config.cinema.geometry, ux, uy, ox, oy);
+				
+				var material=new THREE.MeshLambertMaterial({color: 0xffffff, map: window.config.cinema.texture});
+				/*material.hue=i/xgrid;
+				material.saturation=j/ygrid;
+				
+				material.color.setHSV(
+					material.hue,
+					material.saturation,
+					1
+				);*/
+				
+				var mesh=new THREE.Mesh(window.config.cinema.geometry, material);
+				mesh.position.x=(i - xgrid/2) * xsize;
+				mesh.position.y=-(j - ygrid/2) * ysize;
+				mesh.position.z=0;
+				
+				mesh.scale.x=mesh.scale.y=mesh.scale.z=1;
+				window.config.cinema.scene.add(mesh);
+				
+				window.config.cinema.meshes.push(mesh);
+				
+				mesh.dx=0.001 * (0.5 - Math.random());
+				mesh.dy=0.001 * (0.5 - Math.random());
+				
+			}
+		}
+		
+		//window.config.cinema.renderer.autoClear=false;
+		
+	}
+	
+	
+}
+
+function changeUvs(geometry, unitx, unity, offsetx, offsety) {
+	for(var i=0; i<geometry.faceVertexUvs[0].length; i++) {
+		var uv=geometry.faceVertexUvs[0][i];
+		for(var j=0; j<uv.length; j++) {
+			uv[j].u=(uv[j].u + offsetx) * unitx;
+			uv[j].v=(uv[j].v + offsety) * unity;
+		}
+	}
+}
+
+
+
 $(function(){
 	$("#camera-start").bind("click", function(){
 		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
 		
-		window.cccontext=document.getElementById("cameraCanvas").getContext("2d");
+		var canvas=document.getElementById("cameraCanvas");
+		window.cccontext=canvas.getContext("2d");
 		
 		var video = document.querySelector("video");
-		$(video).css("display", "none");
+		$(video).css("display", "inline-block");
+		//$(video).css("height", "600px");
+		
+		canvas.width=video.width;
+		canvas.height=video.height;
 		
 		$("#cameraCanvas").css("height", "100%");
 		
@@ -38,18 +248,109 @@ $(function(){
 			);
 		}
 		
-	}).trigger("click");;
+			
+		{
+			$("#camera-render").trigger("change");
+		}
+	})/*.trigger("click")*/;
 	
 	$("#camera-stop").bind("click", function(){
-		window.stream.stop();
+		//$(video).css("display", "none");
+		if(window.stream){
+			window.stream.stop();
+		}
+	});
+	
+	$("#camera-snap").bind("click", function(){
+		if(window.stream){
+			var url=document.querySelector("#cameraCanvas").toDataURL("image/webp");
+			window.open(url);
+		}
 	});
 		
 	setInterval(function(){
-		if(window.cccontext) {
-			var video = document.querySelector("video");
-			cccontext.drawImage(video,0,0,video.width,video.height);
+		var video = document.querySelector("video");
+		if(window.cccontext && video.readyState===video.HAVE_ENOUGH_DATA) {
+			cccontext.drawImage(
+				video,
+				0,0,
+				cccontext.canvas.width,cccontext.canvas.height
+			);
+			
+			// flip it if enable
+			if(config["camera.flip.mode"]){
+				var frameData=cccontext.getImageData(0,0,cccontext.canvas.width,cccontext.canvas.height);
+				
+				for(var i=0; i<frameData.height; i++) {
+					for(var j=0; j<frameData.width/2; j++) {
+						var index=(i*4)*frameData.width+(j*4);
+						var mirrorIndex=((i+1)*4)*frameData.width-((j+1)*4);
+						for(var p=0; p<4; p++) {
+							var tmp=frameData.data[index+p];
+							frameData.data[index+p]=frameData.data[mirrorIndex+p];
+							frameData.data[mirrorIndex+p]=tmp;
+						}
+					}
+				}
+				
+				cccontext.putImageData(frameData, 0,0,0,0, frameData.width, frameData.height);
+			}
+		}
+		
+		if(window.config.cinema.renderer){
+			if(video.readyState===video.HAVE_ENOUGH_DATA) {
+				window.config.cinema.texture.needsUpdate=true;
+			}
+			
+			if($("#camera-render").val()==="grids") {
+				
+				if(window.config.cinema.counter%100 == 0) {
+					for(var i=0; i<window.config.cinema.meshes.length; i++) {
+						var mesh=window.config.cinema.meshes[i];
+						mesh.dx*=-1;
+						mesh.dy*=-1;
+					}
+				}else if(window.config.cinema.counter%100 > 20) {
+					for(var i=0; i<window.config.cinema.meshes.length; i++) {
+						var mesh=window.config.cinema.meshes[i];
+						mesh.rotation.x += 100 * mesh.dx;
+						mesh.rotation.y += 100 * mesh.dy;
+						
+						mesh.position.x += 200 * mesh.dx;
+						mesh.position.y += 200 * mesh.dy;
+						mesh.position.z += 400 * mesh.dx;
+					}
+				}
+				
+				window.config.cinema.counter++;
+			}
+			
+			window.config.cinema.renderer.render(window.config.cinema.scene, window.config.cinema.camera);
 		}
 	}, 16);
+	
+	
+	$("#camera-flip").bind("change", function(){
+		config["camera.flip.mode"]=$(this).val()==="false"?false:true;
+	}).trigger("change");
+	
+	$("#camera-filter").bind("change", function(){
+		var effect=$(this).val();
+		//document.querySelector("#cameraCanvas").className="";
+		//document.querySelector("#cameraCanvas").classList.add(effect);
+		
+		document.querySelector("#cinemaCanvas").className=effect;
+		//document.querySelector("#cinemaCanvas").classList.add(effect);
+	}).trigger("change");
+	
+	$("#camera-render").bind("change", function(){
+		var renderMethod=$(this).val();
+		var func=window.config.method[renderMethod];
+		
+		func?func(document.querySelector("#cameraCanvas"), document.querySelector("#cinemaCanvas")):null;
+		
+	});
+	
 });
 
 
@@ -60,26 +361,59 @@ function update(stream, which) {
 
 <style>
 html, body {height:100%;vertical-align:middle;margin:0;padding:0;background:#ddd;border-spacing:0;overflow:hidden;text-align:center;}
-button {background:none;border:1px solid silver;cursor:pointer;color:white;border-radius:5px;}
-button:hover {background:rgba(0,0,0,.4);}
+button {background:none;border:1px solid silver;cursor:pointer;color:white;border-radius:5px;font-weight:bold;}
+.bgG:hover {background:rgba(0,255,0,.4);}
+.bgR:hover {background:rgba(255,0,0,.4);}
+.bgB:hover {background:rgba(0,0,255,.4);}
+a {color:white;}
+.container {text-align:center;}
+.cornerCamera {position: absolute;left:0;top:0;z-index:2;opacity: .8;box-shadow: rgba(64,64,64,.5) 1px 1px 2px;-webkit-transform:scale(0.5,0.5);-webkit-transform-origin:0 0 0;}
+
 </style>
 </head>
 
 <body>
 
 <div style="z-index:999;position:absolute;margin:auto;top:5px;text-align: center;width:100%;">
-	<button id="camera-start">Start Camera</button>
-	<a target="_blank" href="http://gorebill.github.com">gorebill.github.com</a>
-	<button id="camera-stop">Stop Camera</button>
+	<button class="bgG" id="camera-start">Start</button>
+	<button class="bgR" id="camera-stop">Stop</button>
+	<!--<button class="bgB" id="camera-snap">Snap</button>-->
+	<a target="_blank" href="http://gorebill.github.com" title="Welcome and love sharing!">gorebill.github.com</a>
+	<select id="camera-flip">
+		<optgroup label="Flip">
+			<option value="true">Mirror</option>
+			<option value="false">Normal</option>
+		</optgroup>
+	</select>
+	<select id="camera-filter">
+		<optgroup label="Filter">
+			<option value="normal">Normal</option>
+			<option value="grayscale">Gray</option>
+			<option value="blur">Blur</option>
+			<option value="invert">Invert</option>
+			<option value="saturate">Saturate</option>
+		</optgroup>
+	</select>
+	<select id="camera-render">
+		<optgroup label="Render">
+			<option value="grids">Grids</option>
+			<option value="plane">Plane</option>
+			<option value="particle">Particle</option>
+		</optgroup>
+	</select>
 </div>
 
-<div id="container">
-	<span>
-		<video width="320" height="240" type="media" autoplay></video>
-		<canvas id="cameraCanvas"></canvas>
+<div class="container">
+	<span style="position:relative;display: inline-block;">
+		<video style="display:none;" width="320" height="240" type="media" autoplay class="cornerCamera"></video>
+		<canvas id="cameraCanvas" style="display: none;">
+			<span style="line-height:80px;">Chrome required and enable your WebRTC first (in chrome://flags).</span>
+		</canvas>
+
+		<canvas id="cinemaCanvas">
+		</canvas>
 	</span>
 </div>
-
 
 </body>
 

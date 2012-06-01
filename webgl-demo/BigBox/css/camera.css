@@ -1,0 +1,32 @@
+
+.grayscale {
+	-webkit-filter: grayscale(1);
+	-moz-filter: grayscale(1);
+	-ms-filter: grayscale(1);
+	-o-filter: grayscale(1);
+	filter: grayscale(1);
+}
+.saturate {
+	-webkit-filter: saturate(10);
+	-moz-filter: saturate(10);
+	-ms-filter: saturate(10);
+	-o-filter: saturate(10);
+	filter: saturate(10);	
+}
+.blur {
+	-webkit-filter: blur(3px);
+	-moz-filter: blur(3px);
+	-ms-filter: blur(3px);
+	-o-filter: blur(3px);
+	filter: blur(3px);
+}
+.invert {
+	-webkit-filter: invert(1);
+	-moz-filter: invert(1);
+	-ms-filter: invert(1);
+	-o-filter: invert(1);
+	filter: invert(1);
+}
+
+
+
