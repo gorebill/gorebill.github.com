@@ -47,7 +47,23 @@ $(function(){
 	setInterval(function(){
 		if(window.cccontext) {
 			var video = document.querySelector("video");
+			
 			cccontext.drawImage(video,0,0,video.width,video.height);
+			var frameData=cccontext.getImageData(0,0,video.width,video.height);
+			
+			for(var i=0; i<frameData.height; i++) {
+				for(var j=0; j<frameData.width/2; j++) {
+					var index=(i*4)*frameData.width+(j*4);
+					var mirrorIndex=((i+1)*4)*frameData.width-((j+1)*4);
+					for(var p=0; p<4; p++) {
+						var tmp=frameData.data[index+p];
+						frameData.data[index+p]=frameData.data[mirrorIndex+p];
+						frameData.data[mirrorIndex+p]=tmp;
+					}
+				}
+			}
+			
+			cccontext.putImageData(frameData, 0,0,0,0, frameData.width, frameData.height);
 		}
 	}, 16);
 });
@@ -62,6 +78,7 @@ function update(stream, which) {
 html, body {height:100%;vertical-align:middle;margin:0;padding:0;background:#ddd;border-spacing:0;overflow:hidden;text-align:center;}
 button {background:none;border:1px solid silver;cursor:pointer;color:white;border-radius:5px;}
 button:hover {background:rgba(0,0,0,.4);}
+a {color:white;}
 </style>
 </head>
 
